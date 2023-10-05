@@ -4,11 +4,10 @@ import tempfile
 import time
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from io import BytesIO
 from pathlib import Path
 from typing import TypeVar
-from zipfile import ZipFile
 
+import jwt
 import pytest
 import requests
 
@@ -23,11 +22,7 @@ _M = TypeVar("_M", bound=VerificationMaterials)
 _MakeMaterialsByType = Callable[[str, _M], tuple[Path, _M]]
 _MakeMaterials = Callable[[str], tuple[Path, VerificationMaterials]]
 
-_OIDC_BEACON_API_URL = (
-    "https://api.github.com/repos/sigstore-conformance/extremely-dangerous-public-oidc-beacon/"
-    "actions"
-)
-_OIDC_BEACON_WORKFLOW_ID = 55399612
+_OIDC_TOKEN_URL = "https://sigstore-conformance.github.io/extremely-dangerous-public-oidc-beacon/oidc-token.txt"
 
 _XFAIL_LIST = os.getenv("GHA_SIGSTORE_CONFORMANCE_XFAIL", "").split()
 
@@ -90,71 +85,27 @@ def identity_token(pytestconfig) -> str:
     if pytestconfig.getoption("--skip-signing"):
         return ""
 
-    gh_token = pytestconfig.getoption("--github-token")
+    token_time: datetime | None = None
     session = requests.Session()
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Authorization": f"Bearer {gh_token}",
-    }
 
-    workflow_time: datetime | None = None
-    run_id: str
-
-    # We need a token that was generated in the last 5 minutes. Keep checking until we find one.
-    while workflow_time is None or datetime.now() - workflow_time >= timedelta(minutes=5):
+    # We need a token that is valid for the estimated test runtime
+    while token_time is None or token_time - datetime.utcnow() < timedelta(minutes=1):
         # If there's a lot of traffic in the GitHub Actions cron queue, we might not have a valid
         # token to use. In that case, wait for 30 seconds and try again.
-        if workflow_time is not None:
+        if token_time is not None:
             # FIXME(jl): logging in pytest?
             # _log("Couldn't find a recent token, waiting...")
             time.sleep(30)
 
-        resp: requests.Response = session.get(
-            url=_OIDC_BEACON_API_URL + f"/workflows/{_OIDC_BEACON_WORKFLOW_ID}/runs",
-            headers=headers,
-        )
+        resp: requests.Response = session.get(_OIDC_TOKEN_URL)
         resp.raise_for_status()
 
-        resp_json = resp.json()
-        workflow_runs = resp_json["workflow_runs"]
-        if not workflow_runs:
-            raise OidcTokenError(f"Found no workflow runs: {resp_json}")
+        # Parse the JWT to find the token expiry time
+        token_bytes = resp.content[:-1]
+        token = jwt.decode(token_bytes, options={"verify_signature": False})
+        token_time = datetime.fromtimestamp(token["exp"])
 
-        workflow_run = workflow_runs[0]
-
-        # If the job is still running, the token artifact won't have been generated yet.
-        if workflow_run["status"] != "completed":
-            continue
-
-        run_id = workflow_run["id"]
-        workflow_time = datetime.strptime(workflow_run["run_started_at"], "%Y-%m-%dT%H:%M:%SZ")
-
-    resp = session.get(
-        url=_OIDC_BEACON_API_URL + f"/runs/{run_id}/artifacts",
-        headers=headers,
-    )
-    resp.raise_for_status()
-
-    resp_json = resp.json()
-    try:
-        artifact_id = next(a["id"] for a in resp_json["artifacts"] if a["name"] == "oidc-token")
-    except StopIteration:
-        raise OidcTokenError("Artifact 'oidc-token' could not be found")
-
-    # Download the OIDC token artifact and unzip the archive.
-    resp = session.get(
-        url=_OIDC_BEACON_API_URL + f"/artifacts/{artifact_id}/zip",
-        headers=headers,
-    )
-    resp.raise_for_status()
-
-    with ZipFile(BytesIO(resp.content)) as artifact_zip:
-        artifact_file = artifact_zip.open("oidc-token.txt")
-
-        # Strip newline.
-        return artifact_file.read().decode().rstrip()
-
+    return token_bytes.decode()
 
 @pytest.fixture
 def client(pytestconfig, identity_token):
