@@ -37,20 +37,13 @@ class ConfigError(Exception):
 
 def pytest_addoption(parser) -> None:
     """
-    Add the `--entrypoint`, `--github-token`, and `--skip-signing` flags to
-    the `pytest` CLI.
+    Add the `--entrypoint` and `--skip-signing` flags to the `pytest` CLI.
     """
     parser.addoption(
         "--entrypoint",
         action="store",
         help="the command to invoke the Sigstore client under test",
         required=True,
-        type=str,
-    )
-    parser.addoption(
-        "--github-token",
-        action="store",
-        help="the GitHub token to supply to the Sigstore client under test",
         type=str,
     )
     parser.addoption(
@@ -66,9 +59,6 @@ def pytest_runtest_setup(item):
 
 
 def pytest_configure(config):
-    if not config.getoption("--github-token") and not config.getoption("--skip-signing"):
-        raise ConfigError("Please specify one of '--github-token' or '--skip-signing'")
-
     config.addinivalue_line("markers", "signing: mark test as requiring signing functionality")
 
 
