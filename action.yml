@@ -32,7 +32,7 @@ runs:
     - name: Run sigstore-conformance
       id: sigstore-conformance
       run: |
-        sleep 60 && killall sigstore-python-conformance && echo log follows... && cat pytest-debug.log &
+        sleep 60 && echo log follows... && cat pytest-debug.log &
         ${{ github.action_path }}/action.py
       env:
         GHA_SIGSTORE_CONFORMANCE_ENTRYPOINT: "${{ inputs.entrypoint }}"
