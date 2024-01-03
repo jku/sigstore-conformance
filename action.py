@@ -27,7 +27,7 @@ def _debug(msg):
 
 
 def _sigstore_conformance(*args) -> int:
-    return pytest.main([str(_ACTION_PATH / "test" / "test_bundle.py"), *args])
+    return pytest.main([str(_ACTION_PATH / "test" / "test_simple.py"), *args])
 
 
 sigstore_conformance_args = []
