@@ -33,7 +33,7 @@ def _sigstore_conformance(*args) -> int:
 sigstore_conformance_args = []
 
 if _DEBUG:
-    sigstore_conformance_args.extend(["-s", "-vv", "--showlocals"])
+    sigstore_conformance_args.extend(["-s", "-vv", "--showlocals", "--debug=pytest-debug.log"])
 
 entrypoint = os.getenv("GHA_SIGSTORE_CONFORMANCE_ENTRYPOINT")
 if entrypoint:
