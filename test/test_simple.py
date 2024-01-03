@@ -1,11 +1,5 @@
-import pytest  # type: ignore
 
-from .client import SigstoreClient
-
-
-
-
-def test_simple(client: SigstoreClient) -> None:
+def test_simple() -> None:
     """
     A simple test that does nothing
     """
