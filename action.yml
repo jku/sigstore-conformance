@@ -41,8 +41,12 @@ runs:
 
     - name: Set up sigstore-conformance
       run: |
+        echo "GLOBAL ENV"
+        pip list
         # NOTE: Sourced, not executed as a script.
         source "${{ github.action_path }}/setup/setup.bash"
+        echo "GLOBAL ENV"
+        pip list
       shell: bash
 
     - name: Run sigstore-conformance
