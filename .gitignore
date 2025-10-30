@@ -14,7 +14,6 @@ build
 /*.crt
 /*.sig
 /*.pem
-/*.sh
 /*.pub
 /*.rekor
 /*.sigstore
