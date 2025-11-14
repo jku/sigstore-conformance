@@ -56,7 +56,7 @@ runs:
       id: sigstore-conformance
       run: |
         ./sigstore-conformance-env/bin/python ${{ github.action_path }}/action.py
-        echo "inputs.skip-result-upload|${{inputs.skip-result-upload}}|${{ inputs.skip-result-upload != 'false' }}"
+        echo "inputs.skip-result-upload|${{inputs.skip-result-upload}}|${{ inputs.skip-result-upload == 'false' }}"
         echo "inputs.environment|${{inputs.environment}}|${{ inputs.environment == 'production' }}"
       env:
         GHA_SIGSTORE_CONFORMANCE_ENVIRONMENT: "${{ inputs.environment }}"
@@ -72,7 +72,7 @@ runs:
       shell: bash
 
     - name: Upload conformance result
-      if: ${{ inputs.skip-result-upload != 'false' && inputs.environment == 'production' }}
+      if: ${{ inputs.skip-result-upload == 'false' && inputs.environment == 'production' }}
       uses: actions/upload-artifact@v5
       with:
         name: conformance-results
