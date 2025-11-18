@@ -53,14 +53,11 @@ def _sigstore_conformance(environment: str) -> int:
 
     status = pytest.main([str(_ACTION_PATH / "test"), *args])
 
-    # Inject the action version into the report
+    # Inject some metadata into the report
     with open("conformance-report.json", "r+") as f:
         report_data = json.load(f)
         if "environment" not in report_data:
             report_data["environment"] = {}
-        report_data["environment"]["conformance_action_version"] = os.getenv(
-            "GHA_SIGSTORE_CONFORMANCE_ACTION_VERSION", "unknown"
-        )
         client_sha = os.getenv("GHA_SIGSTORE_CONFORMANCE_CLIENT_SHA")
         if client_sha:
             report_data["environment"]["client_sha"] = client_sha
