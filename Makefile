@@ -1,6 +1,6 @@
 ALL_PY_SRCS := action.py \
 	sigstore-python-conformance \
-	$(shell find test/ -name '*.py') \
+	$(shell find conformance/ -name '*.py') \
 	$(shell find tools/ -name '*.py') \
 	$(shell find .github/scripts/ -name '*.py')
 
@@ -26,7 +26,7 @@ dev: env/pyvenv.cfg selftest-env/pyvenv.cfg
 lint: env/pyvenv.cfg $(ALL_PY_SRCS)
 	./env/bin/python -m ruff format $(ALL_PY_SRCS)
 	./env/bin/python -m ruff check --fix $(ALL_PY_SRCS)
-	./env/bin/python -m mypy action.py test/
+	./env/bin/python -m mypy action.py conformance/
 
 requirements.txt: requirements.in env/bootstrap
 	. ./env/bin/activate && uv pip compile --custom-compile-command "make requirements.txt" --prerelease=allow --generate-hashes --output-file=$@ $<

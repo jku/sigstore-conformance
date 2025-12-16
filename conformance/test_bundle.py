@@ -9,8 +9,8 @@ from cryptography import x509
 from sigstore_protobuf_specs.dev.sigstore.bundle.v1 import Bundle
 from sigstore_protobuf_specs.dev.sigstore.rekor.v1 import KindVersion
 
-from test.client import BundleMaterials, ClientFail, SigstoreClient
-from test.conftest import _MakeMaterialsByType, _VerifyBundle
+from conformance.client import BundleMaterials, ClientFail, SigstoreClient
+from conformance.conftest import _MakeMaterialsByType, _VerifyBundle
 
 SKIP_CPYTHON_RELEASE_TESTS = (
     os.getenv("GHA_SIGSTORE_CONFORMANCE_SKIP_CPYTHON_RELEASE_TESTS", "false") != "false"

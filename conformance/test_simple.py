@@ -1,9 +1,7 @@
 import pytest  # type: ignore
 
-from test.client import BundleMaterials
-from test.conftest import _MakeMaterialsByType
-
-from .client import SigstoreClient
+from conformance.client import BundleMaterials, SigstoreClient
+from conformance.conftest import _MakeMaterialsByType
 
 
 @pytest.mark.signing

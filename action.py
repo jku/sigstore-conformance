@@ -49,7 +49,7 @@ def _sigstore_conformance(environment: str) -> int:
     print(f"running sigstore-conformance against Sigstore {environment} infrastructure")
     _debug(f"running: sigstore-conformance {[str(a) for a in args]}")
 
-    status = pytest.main([str(_ACTION_PATH / "test"), *args])
+    status = pytest.main([str(_ACTION_PATH / "conformance"), *args])
 
     # Inject some metadata into the report
     with open("conformance-report.json", "r+") as f:
