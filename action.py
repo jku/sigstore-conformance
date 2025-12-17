@@ -47,7 +47,7 @@ def _sigstore_conformance(environment: str) -> int:
         args.extend(["--skip-signing"])
 
     print(f"running sigstore-conformance against Sigstore {environment} infrastructure")
-    _debug(f"running: sigstore-conformance {[str(a) for a in args]}")
+    print(f"running: sigstore-conformance {[str(a) for a in args]}")
 
     status = pytest.main([str(_ACTION_PATH / "test"), *args])
 
